@@ -1,19 +1,17 @@
 import type { Metadata } from "next";
-import { Raleway, Bebas_Neue } from "next/font/google";
+import { Poppins, Inter } from "next/font/google";
 import "./globals.css";
 
-// Heading font — Raleway for specs, labels, body
-const raleway = Raleway({
-  variable: "--font-raleway",
+const poppins = Poppins({
+  variable: "--font-main",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
-// Display font — Bebas Neue, the iconic automotive condensed font
-const bebasNeue = Bebas_Neue({
-  variable: "--font-bebas",
+const inter = Inter({
+  variable: "--font-sub",
   subsets: ["latin"],
-  weight: "400",
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -25,7 +23,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${raleway.variable} ${bebasNeue.variable} h-full antialiased`}>
+    <html lang="en" className={`${poppins.variable} ${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-[#0a0a0a] text-[#f5f5f5]">
         {children}
       </body>

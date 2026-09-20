@@ -16,18 +16,18 @@ function formatMileage(m: number) {
 function RoadworthyBadge({ status }: { status: string }) {
   if (status === "pass")
     return (
-      <span className="flex items-center gap-1 text-[10px] font-bold tracking-widest uppercase text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-1">
+      <span className="font-display flex items-center gap-1 text-[10px] font-bold tracking-widest uppercase text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-1">
         <CheckCircle size={10} /> Roadworthy
       </span>
     );
   if (status === "fail")
     return (
-      <span className="flex items-center gap-1 text-[10px] font-bold tracking-widest uppercase text-red-600 bg-red-50 border border-red-200 px-2 py-1">
+      <span className="font-display flex items-center gap-1 text-[10px] font-bold tracking-widest uppercase text-red-600 bg-red-50 border border-red-200 px-2 py-1">
         <XCircle size={10} /> Not Roadworthy
       </span>
     );
   return (
-    <span className="flex items-center gap-1 text-[10px] font-bold tracking-widest uppercase text-amber-600 bg-amber-50 border border-amber-200 px-2 py-1">
+    <span className="font-display flex items-center gap-1 text-[10px] font-bold tracking-widest uppercase text-amber-600 bg-amber-50 border border-amber-200 px-2 py-1">
       <Clock size={10} /> Pending
     </span>
   );
@@ -132,7 +132,7 @@ export default function CarCard({ car }: { car: Car }) {
         <div className="flex flex-wrap gap-2">
           <RoadworthyBadge status={car.roadworthiness?.status || "pending"} />
           {!isSold && (
-            <span className="flex items-center gap-1 text-[10px] font-bold tracking-widest uppercase text-blue-400 bg-blue-400/10 border border-blue-400/30 px-2 py-1">
+            <span className="font-display flex items-center gap-1 text-[10px] font-bold tracking-widest uppercase text-blue-400 bg-blue-400/10 border border-blue-400/30 px-2 py-1">
               <Banknote size={10} /> Easy Financing
             </span>
           )}

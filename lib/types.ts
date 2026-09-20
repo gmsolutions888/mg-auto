@@ -213,6 +213,23 @@ export interface Partner {
   createdAt: string;
 }
 
+export interface SellInquiry {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  brand: string;
+  model: string;
+  year: string;
+  mileage: string;
+  transmission: string;
+  condition: string;
+  askingPrice: string;
+  notes?: string;
+  status: "new" | "read" | "responded";
+  createdAt: string;
+}
+
 export interface PartnerNotification {
   id: string;
   partnerId: string;

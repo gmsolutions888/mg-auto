@@ -100,6 +100,7 @@ interface Filters {
   priceMin: number;
   priceMax: number;
   sort: string;
+  financing: boolean;
 }
 
 const SORT_OPTIONS = [
@@ -117,6 +118,7 @@ export default function CarGrid({ cars, defaultShowFilters = false, columns = 3 
     priceMin: SLIDER_MIN,
     priceMax: SLIDER_MAX,
     sort: "newest",
+    financing: false,
   });
   const [showFilters, setShowFilters] = useState(false);
 
@@ -147,6 +149,7 @@ export default function CarGrid({ cars, defaultShowFilters = false, columns = 3 
     }
     if (filters.brand) result = result.filter((c) => c.brand === filters.brand);
     if (filters.carType) result = result.filter((c) => c.carType === filters.carType);
+    if (filters.financing) result = result.filter((c) => c.financing?.available === true);
     result = result.filter(
       (c) => c.sellingPrice >= filters.priceMin && c.sellingPrice <= filters.priceMax
     );
@@ -170,10 +173,10 @@ export default function CarGrid({ cars, defaultShowFilters = false, columns = 3 
     return result;
   }, [cars, filters, searchQuery]);
 
-  const activeFilterCount = [filters.brand, filters.carType, priceActive].filter(Boolean).length;
+  const activeFilterCount = [filters.brand, filters.carType, priceActive, filters.financing].filter(Boolean).length;
 
   function clearFilters() {
-    setFilters({ brand: "", carType: "", priceMin: SLIDER_MIN, priceMax: SLIDER_MAX, sort: "newest" });
+    setFilters({ brand: "", carType: "", priceMin: SLIDER_MIN, priceMax: SLIDER_MAX, sort: "newest", financing: false });
     setSearchQuery("");
   }
 
@@ -213,6 +216,9 @@ export default function CarGrid({ cars, defaultShowFilters = false, columns = 3 
                 label={`${fmtPrice(filters.priceMin)} – ${filters.priceMax >= SLIDER_MAX ? `${fmtPrice(SLIDER_MAX)}+` : fmtPrice(filters.priceMax)}`}
                 onRemove={() => setFilters((f) => ({ ...f, priceMin: SLIDER_MIN, priceMax: SLIDER_MAX }))}
               />
+            )}
+            {filters.financing && (
+              <Tag label="Financing Available" onRemove={() => setFilters((f) => ({ ...f, financing: false }))} />
             )}
             {activeFilterCount > 0 && (
               <button
@@ -284,7 +290,7 @@ export default function CarGrid({ cars, defaultShowFilters = false, columns = 3 
 
           {/* Expanded filter row */}
           {showFilters && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-3 pt-3 border-t border-gray-100">
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-3 pt-3 border-t border-gray-100">
               {/* Brand */}
               <div className="relative">
                 <label className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 block mb-2">Brand</label>
@@ -322,6 +328,22 @@ export default function CarGrid({ cars, defaultShowFilters = false, columns = 3 
                   onMinChange={(v) => setFilters((f) => ({ ...f, priceMin: v }))}
                   onMaxChange={(v) => setFilters((f) => ({ ...f, priceMax: v }))}
                 />
+              </div>
+
+              {/* Financing toggle */}
+              <div>
+                <label className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 block mb-2">Financing</label>
+                <button
+                  onClick={() => setFilters((f) => ({ ...f, financing: !f.financing }))}
+                  className={`flex items-center gap-2 w-full px-3 py-2.5 border text-xs font-bold tracking-widest uppercase transition-colors ${
+                    filters.financing
+                      ? "border-[#cc1111] text-[#cc1111] bg-red-50"
+                      : "border-gray-200 text-gray-400 hover:border-[#cc1111] hover:text-[#cc1111]"
+                  }`}
+                >
+                  <span className={`w-3 h-3 rounded-full border-2 transition-colors ${filters.financing ? "bg-[#cc1111] border-[#cc1111]" : "border-gray-300"}`} />
+                  Available Only
+                </button>
               </div>
             </div>
           )}

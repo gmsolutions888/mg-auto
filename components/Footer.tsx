@@ -29,7 +29,8 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2.5">
               {[
-                { label: "Available Units", href: "/cars" },
+                { label: "Buy a Car", href: "/cars" },
+                { label: "Sell a Car", href: "/sell" },
                 { label: "FAQs", href: "/faq" },
                 { label: "About", href: "/about" },
                 { label: "Contact Us", href: "/contact" },

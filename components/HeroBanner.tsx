@@ -68,9 +68,9 @@ export default function HeroBanner() {
             transition={{ duration: 0.7, delay: 0.1 }}
             className="font-display text-[80px] sm:text-[100px] lg:text-[110px] text-gray-900 leading-none mb-6 uppercase"
           >
-            Find Your
+            Buy With
             <br />
-            <span className="text-[#cc1111]">Next Car.</span>
+            <span className="text-[#cc1111]">Confidence.</span>
           </motion.h1>
 
           {/* Description */}
@@ -80,8 +80,8 @@ export default function HeroBanner() {
             transition={{ duration: 0.6, delay: 0.25 }}
             className="text-gray-500 text-base max-w-sm mb-8 leading-relaxed"
           >
-            Fully inspected by Master Garage, roadworthy certified pre-owned vehicles.
-            Complete service history and parts transparency.
+            Every unit inspected, roadworthy certified, and backed by full service history.
+            No surprises — just a car you can trust.
           </motion.p>
 
           {/* CTAs */}

@@ -14,12 +14,14 @@ import {
   Users,
   LogOut,
   BarChart2,
+  Tag,
 } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/cars", label: "Units", icon: Car },
   { href: "/admin/inquiries", label: "Inquiries", icon: MessageSquare },
+  { href: "/admin/sell-inquiries", label: "Sell a Car", icon: Tag },
   { href: "/admin/partners", label: "Partners", icon: Users },
   { href: "/admin/reports", label: "Reports", icon: BarChart2 },
 ];

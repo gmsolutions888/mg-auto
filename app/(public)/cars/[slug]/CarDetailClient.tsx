@@ -9,13 +9,13 @@ import { submitInquiry } from "@/lib/inquiries";
 import { motion } from "framer-motion";
 import {
   CheckCircle, XCircle, Clock, Gauge, Fuel, Settings2,
-  Users, Send, Banknote, AlertTriangle, Share2, ChevronLeft, Eye,
+  Users, Send, Banknote, AlertTriangle, ChevronDown, Share2, ChevronLeft, Eye,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-const WHATSAPP_NUMBER = "639XXXXXXXXX"; // update with actual number
+const VIBER_NUMBER = "639XXXXXXXXX"; // update with actual number
 
 const inquirySchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -88,11 +88,12 @@ function RoadworthyBadge({ status }: { status: string }) {
 
 export default function CarDetailClient({ car, relatedCars = [] }: { car: Car; relatedCars?: Car[] }) {
   const [activePhoto, setActivePhoto] = useState(0);
-  const [tab, setTab] = useState<"overview" | "service" | "parts" | "financing" | "diagnosis">("overview");
+  const [tab, setTab] = useState<"overview" | "service" | "parts" | "financing">("overview");
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showFloating, setShowFloating] = useState(false);
+  const [openDiagCats, setOpenDiagCats] = useState<string[]>([]);
 
   useEffect(() => {
     const handler = () => setShowFloating(window.scrollY > 500);
@@ -301,19 +302,147 @@ export default function CarDetailClient({ car, relatedCars = [] }: { car: Car; r
               {car.description && (
                 <p className="text-[#666] leading-relaxed mb-6">{car.description}</p>
               )}
-              <RoadworthyBadge status={car.roadworthiness?.status || "pending"} />
-              {car.roadworthiness?.notes && (
-                <p className="text-[#555] text-sm mt-3">{car.roadworthiness.notes}</p>
-              )}
-              {car.roadworthiness?.expiryDate && (
-                <p className="text-[#444] text-xs mt-1 tracking-widest">
-                  EXPIRES: {formatDate(car.roadworthiness.expiryDate)}
-                </p>
-              )}
             </motion.div>
           </div>
         </div>
       </section>
+
+      {/* DIAGNOSIS SHOWCASE */}
+      {car.diagnosis && (
+        <section className="pt-10 pb-20 border-b border-gray-100 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            {/* Header */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="mb-12"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 whitespace-nowrap">
+                    Full Vehicle Diagnosis Report
+                  </h3>
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  {/* Summary counts */}
+                  {([
+                    { status: "ok" as DiagnosisStatus,        label: "OK",        color: "#16a34a", bg: "#f0fdf4", icon: <CheckCircle size={13} /> },
+                    { status: "attention" as DiagnosisStatus, label: "Attention", color: "#b45309", bg: "#fffbeb", icon: <AlertTriangle size={13} /> },
+                    { status: "critical" as DiagnosisStatus,  label: "Critical",  color: "#cc1111", bg: "#fef2f2", icon: <XCircle size={13} /> },
+                  ]).map(({ status, label, color, bg, icon }) => {
+                    const count = car.diagnosis!.categories.flatMap(c => c.items).filter(i => i.status === status).length;
+                    if (count === 0) return null;
+                    return (
+                      <div key={status} className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase rounded-sm" style={{ color, backgroundColor: bg }}>
+                        {icon} {count} {label}
+                      </div>
+                    );
+                  })}
+                  {/* Overall status */}
+                  {car.diagnosis.overallStatus && (() => {
+                    const cfg: Record<DiagnosisStatus, { label: string; color: string }> = {
+                      ok:        { label: "All Clear",       color: "#16a34a" },
+                      attention: { label: "Needs Attention", color: "#b45309" },
+                      critical:  { label: "Critical Issues", color: "#cc1111" },
+                    };
+                    const c = cfg[car.diagnosis!.overallStatus];
+                    return <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: c.color }}>{c.label}</span>;
+                  })()}
+                </div>
+              </div>
+              {car.diagnosis.date && (
+                <p className="text-gray-400 text-xs mt-3 tracking-widest">
+                  Inspected: {formatDate(car.diagnosis.date)}{car.diagnosis.technician ? ` · ${car.diagnosis.technician}` : ""}
+                </p>
+              )}
+            </motion.div>
+
+            {/* Category accordion */}
+            <div className="space-y-2">
+              {car.diagnosis.categories.map((cat, ci) => {
+                const total = cat.items.length;
+                const okCount = cat.items.filter(i => i.status === "ok").length;
+                const attentionCount = cat.items.filter(i => i.status === "attention").length;
+                const criticalCount = cat.items.filter(i => i.status === "critical").length;
+                const isOpen = openDiagCats.includes(cat.category);
+                const statusCfg: Record<DiagnosisStatus, { color: string; bg: string; icon: React.ReactNode }> = {
+                  ok:        { color: "#16a34a", bg: "#f0fdf4", icon: <CheckCircle size={11} /> },
+                  attention: { color: "#b45309", bg: "#fffbeb", icon: <AlertTriangle size={11} /> },
+                  critical:  { color: "#cc1111", bg: "#fef2f2", icon: <XCircle size={11} /> },
+                };
+                return (
+                  <motion.div
+                    key={cat.category}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: ci * 0.04 }}
+                    className="border border-gray-200 bg-white"
+                  >
+                    {/* Row — always visible */}
+                    <button
+                      onClick={() => setOpenDiagCats(prev =>
+                        prev.includes(cat.category) ? prev.filter(c => c !== cat.category) : [...prev, cat.category]
+                      )}
+                      className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-gray-50 transition-colors"
+                    >
+                      {/* Category name */}
+                      <span className="text-sm font-semibold text-gray-900 w-44 flex-shrink-0 whitespace-nowrap">{cat.category}</span>
+
+                      {/* Segmented bar */}
+                      <div className="flex-1 flex h-1.5 rounded-full overflow-hidden gap-px">
+                        {okCount > 0 && (
+                          <div className="bg-emerald-500 rounded-full" style={{ width: `${(okCount / total) * 100}%` }} />
+                        )}
+                        {attentionCount > 0 && (
+                          <div className="bg-amber-500 rounded-full" style={{ width: `${(attentionCount / total) * 100}%` }} />
+                        )}
+                        {criticalCount > 0 && (
+                          <div className="bg-[#cc1111] rounded-full" style={{ width: `${(criticalCount / total) * 100}%` }} />
+                        )}
+                      </div>
+
+                      {/* Status summary */}
+                      <span className="text-[10px] font-bold tracking-widest uppercase w-24 text-right flex-shrink-0"
+                        style={{ color: criticalCount > 0 ? "#cc1111" : attentionCount > 0 ? "#b45309" : "#16a34a" }}>
+                        {criticalCount > 0 ? `${criticalCount} Critical` : attentionCount > 0 ? `${attentionCount} Attention` : "All Clear"}
+                      </span>
+
+                      {/* Chevron */}
+                      <ChevronDown size={14} className={`text-gray-400 flex-shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                    </button>
+
+                    {/* Expanded items */}
+                    {isOpen && (
+                      <div className="border-t border-gray-100 divide-y divide-gray-50">
+                        {cat.items.map((item, ii) => {
+                          const sc = statusCfg[item.status];
+                          return (
+                            <div key={ii} className="flex items-center justify-between px-5 py-3 gap-4">
+                              <span className="text-gray-500 text-sm">{item.name}</span>
+                              <span className="flex items-center gap-1 text-[9px] font-bold tracking-wider uppercase px-2 py-1 flex-shrink-0"
+                                style={{ color: sc.color, backgroundColor: sc.bg }}>
+                                {sc.icon}
+                                <span className="ml-1">{item.status === "ok" ? "OK" : item.status === "attention" ? "Attention" : "Critical"}</span>
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {car.diagnosis.notes && (
+              <p className="text-gray-400 text-sm mt-8 border-l-2 border-[#cc1111]/30 pl-4">{car.diagnosis.notes}</p>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* TECH SPECS — dark */}
       <section className="py-20 border-b border-[#1f1f1f] bg-[#0a0a0a] overflow-hidden">
@@ -351,7 +480,7 @@ export default function CarDetailClient({ car, relatedCars = [] }: { car: Car; r
       <section className="py-20 border-b border-gray-200 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex gap-0 mb-10 border-b border-gray-200 flex-wrap">
-            {(["overview", "service", "parts", "diagnosis", "financing"] as const).map((t) => (
+            {(["overview", "service", "parts", "financing"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
@@ -362,8 +491,7 @@ export default function CarDetailClient({ car, relatedCars = [] }: { car: Car; r
                 {t === "overview" ? "Overview"
                   : t === "service" ? "Service History"
                   : t === "parts" ? "Parts Replaced"
-                  : t === "financing" ? "Financing"
-                  : "Diagnosis"}
+                  : "Financing"}
               </button>
             ))}
           </div>
@@ -470,118 +598,6 @@ export default function CarDetailClient({ car, relatedCars = [] }: { car: Car; r
             </div>
           )}
 
-          {tab === "diagnosis" && (
-            <div>
-              {!car.diagnosis ? (
-                <p className="text-[#555] text-sm">No diagnosis records available for this unit.</p>
-              ) : (
-                <div className="space-y-6">
-                  <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-gray-200">
-                    <div className="flex flex-wrap gap-6">
-                      {car.diagnosis.date && (
-                        <div>
-                          <p className="text-[10px] font-bold tracking-widest uppercase text-gray-400 mb-1">Inspection Date</p>
-                          <p className="text-gray-900 text-sm">{formatDate(car.diagnosis.date)}</p>
-                        </div>
-                      )}
-                      {car.diagnosis.technician && (
-                        <div>
-                          <p className="text-[10px] font-bold tracking-widest uppercase text-gray-400 mb-1">Technician</p>
-                          <p className="text-gray-900 text-sm">{car.diagnosis.technician}</p>
-                        </div>
-                      )}
-                    </div>
-                    {car.diagnosis.overallStatus && (() => {
-                      const cfg: Record<DiagnosisStatus, { label: string; color: string; border: string; bg: string; icon: React.ReactNode }> = {
-                        ok:        { label: "All Clear",       color: "#16a34a", border: "#bbf7d0", bg: "#f0fdf4", icon: <CheckCircle size={16} /> },
-                        attention: { label: "Needs Attention", color: "#b45309", border: "#fde68a", bg: "#fffbeb", icon: <AlertTriangle size={16} /> },
-                        critical:  { label: "Critical Issues", color: "#cc1111", border: "#fecaca", bg: "#fef2f2", icon: <XCircle size={16} /> },
-                      };
-                      const c = cfg[car.diagnosis!.overallStatus];
-                      return (
-                        <div className="flex items-center gap-2 px-4 py-2 border text-sm font-bold tracking-widest uppercase"
-                          style={{ borderColor: c.border, color: c.color, backgroundColor: c.bg }}>
-                          <span>{c.icon}</span>
-                          {c.label}
-                        </div>
-                      );
-                    })()}
-                  </div>
-
-                  <div className="flex flex-wrap gap-3">
-                    {([
-                      { status: "ok" as DiagnosisStatus,       label: "OK",        color: "#16a34a", border: "#bbf7d0", icon: <CheckCircle size={12} /> },
-                      { status: "attention" as DiagnosisStatus, label: "Attention", color: "#b45309", border: "#fde68a", icon: <AlertTriangle size={12} /> },
-                      { status: "critical" as DiagnosisStatus,  label: "Critical",  color: "#cc1111", border: "#fecaca", icon: <XCircle size={12} /> },
-                    ]).map(({ status, label, color, border, icon }) => {
-                      const count = car.diagnosis!.categories.flatMap(c => c.items).filter(i => i.status === status).length;
-                      return (
-                        <div key={status} className="flex items-center gap-1.5 px-3 py-1.5 border text-xs font-bold tracking-widest uppercase"
-                          style={{ borderColor: border, color }}>
-                          {icon}
-                          <span>{count} {label}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {car.diagnosis.categories.map((cat) => {
-                    const issues = cat.items.filter(i => i.status !== "ok").length;
-                    const dotColors: Record<DiagnosisStatus, string> = { ok: "#16a34a", attention: "#b45309", critical: "#cc1111" };
-                    return (
-                      <div key={cat.category} className="border border-gray-200">
-                        <div className="flex items-center justify-between px-5 py-3 bg-gray-50">
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs font-bold tracking-[0.3em] uppercase text-gray-900">{cat.category}</span>
-                            {issues > 0 && (
-                              <span className="text-[9px] font-bold tracking-wider px-2 py-0.5 border border-amber-200 text-amber-700 bg-amber-50">
-                                {issues} issue{issues > 1 ? "s" : ""}
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex gap-1">
-                            {cat.items.map((item, ii) => (
-                              <span key={ii} className="w-2 h-2 rounded-full" style={{ backgroundColor: dotColors[item.status] }} />
-                            ))}
-                          </div>
-                        </div>
-                        <div className="divide-y divide-gray-100">
-                          {cat.items.map((item, ii) => {
-                            const statusCfg: Record<DiagnosisStatus, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
-                              ok:        { label: "OK",        color: "#16a34a", bg: "#f0fdf4", icon: <CheckCircle size={12} /> },
-                              attention: { label: "Attention", color: "#b45309", bg: "#fffbeb", icon: <AlertTriangle size={12} /> },
-                              critical:  { label: "Critical",  color: "#cc1111", bg: "#fef2f2", icon: <XCircle size={12} /> },
-                            };
-                            const sc = statusCfg[item.status];
-                            return (
-                              <div key={ii} className="px-5 py-3 flex items-start justify-between gap-4 bg-white">
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm text-gray-900">{item.name}</p>
-                                  {item.notes && <p className="text-gray-400 text-xs mt-0.5">{item.notes}</p>}
-                                </div>
-                                <div className="flex items-center gap-1 px-2.5 py-1 text-[9px] font-bold tracking-wider uppercase flex-shrink-0"
-                                  style={{ color: sc.color, backgroundColor: sc.bg }}>
-                                  {sc.icon}
-                                  <span className="ml-1">{sc.label}</span>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                  {car.diagnosis.notes && (
-                    <div className="border-l-2 border-[#cc1111]/30 pl-4">
-                      <p className="text-[10px] font-bold tracking-widest uppercase text-gray-400 mb-1">Diagnosis Notes</p>
-                      <p className="text-gray-600 text-sm">{car.diagnosis.notes}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </section>
 
@@ -597,15 +613,13 @@ export default function CarDetailClient({ car, relatedCars = [] }: { car: Car; r
           <h3 className="font-display text-5xl sm:text-6xl text-gray-900 uppercase tracking-tight mb-1">Ask About</h3>
           <h3 className="font-display text-5xl sm:text-6xl text-[#cc1111] uppercase tracking-tight mb-8">This Unit</h3>
 
-          {/* WhatsApp CTA */}
+          {/* Viber CTA */}
           <a
-            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi, I'm interested in the ${car.year} ${car.brand} ${car.model}. Is it still available?`)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-8 py-3 bg-[#25D366] text-white text-xs font-bold tracking-widest uppercase hover:bg-[#1ebe5c] transition-colors mb-6"
+            href={`viber://chat?number=${VIBER_NUMBER}&text=${encodeURIComponent(`Hi, I'm interested in the ${car.year} ${car.brand} ${car.model}. Is it still available?`)}`}
+            className="inline-flex items-center gap-2 px-8 py-3 bg-[#7360F2] text-white text-xs font-bold tracking-widest uppercase hover:bg-[#5f4fd4] transition-colors mb-6"
           >
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.553 4.12 1.52 5.855L.057 23.98l6.305-1.454A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.854 0-3.6-.5-5.1-1.373l-.365-.217-3.743.863.93-3.63-.239-.374A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-            Chat on WhatsApp
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M11.4 0C6.37.03 2.13 2.22.5 6.1c-.9 2.1-1.03 4.33-.86 6.56.15 1.9.57 3.78 1.5 5.46 1.67 3.03 4.64 5.05 7.97 5.67.9.17 1.82.22 2.74.21l4.66 2.56-.04-2.68c1.08-.32 2.12-.8 3.02-1.5 2.8-2.16 4.2-5.6 4.01-9.08C23.27 5.57 19.2.9 13.9.13c-.83-.12-1.67-.15-2.5-.13zm.2 1.7c.73-.02 1.47.02 2.2.13 4.72.68 8.12 4.76 7.9 9.5.16 3.07-1.1 6.07-3.6 7.96-.72.56-1.56.97-2.44 1.24l-.65.2.03 1.7-2.94-1.62-.5.02c-.84.03-1.68-.01-2.5-.16-2.98-.55-5.6-2.32-7.07-5.02-.82-1.5-1.2-3.2-1.33-4.9-.16-2.07-.03-4.14.77-6.03C4.7 2.6 7.92.72 11.6 1.7zm-.75 3.13c-.28.02-.5.26-.5.54v.27c.02 1.25.56 2.45 1.49 3.3.97.88 2.23 1.34 3.53 1.42.28.02.53-.22.54-.5v-.27c.02-.28-.2-.53-.48-.56-.98-.08-1.93-.44-2.68-1.1-.72-.65-1.16-1.55-1.22-2.52-.02-.28-.27-.5-.55-.48l-.13-.1zM9.7 5.97c-.17 0-.34.06-.47.18L8.2 7.2c-.3.28-.38.72-.2 1.08.64 1.27 1.56 2.44 2.68 3.36 1.12.92 2.44 1.6 3.85 1.96.38.1.8-.06 1-.4l.74-1.18c.17-.27.13-.62-.1-.84L14.8 9.84c-.25-.23-.63-.24-.9-.04l-.84.63c-.17.12-.4.1-.55-.05-.5-.5-.93-1.08-1.27-1.7-.13-.23-.1-.52.08-.7l.62-.67c.22-.24.23-.6.04-.86L11.2 6.17c-.13-.13-.3-.2-.48-.2h-.02z"/></svg>
+            Chat on Viber
           </a>
 
           <p className="text-gray-400 text-xs mb-8 tracking-widest">— or fill out the form below —</p>
@@ -732,13 +746,11 @@ export default function CarDetailClient({ car, relatedCars = [] }: { car: Car; r
           </div>
           <div className="flex items-center gap-2">
             <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi, I'm interested in the ${car.year} ${car.brand} ${car.model}. Is it still available?`)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-4 py-2.5 bg-[#25D366] text-white text-[10px] font-bold tracking-widest uppercase"
+              href={`viber://chat?number=${VIBER_NUMBER}&text=${encodeURIComponent(`Hi, I'm interested in the ${car.year} ${car.brand} ${car.model}. Is it still available?`)}`}
+              className="flex items-center gap-1.5 px-4 py-2.5 bg-[#7360F2] text-white text-[10px] font-bold tracking-widest uppercase"
             >
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.553 4.12 1.52 5.855L.057 23.98l6.305-1.454A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.854 0-3.6-.5-5.1-1.373l-.365-.217-3.743.863.93-3.63-.239-.374A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-              WhatsApp
+              <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5"><path d="M11.4 0C6.37.03 2.13 2.22.5 6.1c-.9 2.1-1.03 4.33-.86 6.56.15 1.9.57 3.78 1.5 5.46 1.67 3.03 4.64 5.05 7.97 5.67.9.17 1.82.22 2.74.21l4.66 2.56-.04-2.68c1.08-.32 2.12-.8 3.02-1.5 2.8-2.16 4.2-5.6 4.01-9.08C23.27 5.57 19.2.9 13.9.13c-.83-.12-1.67-.15-2.5-.13zm.2 1.7c.73-.02 1.47.02 2.2.13 4.72.68 8.12 4.76 7.9 9.5.16 3.07-1.1 6.07-3.6 7.96-.72.56-1.56.97-2.44 1.24l-.65.2.03 1.7-2.94-1.62-.5.02c-.84.03-1.68-.01-2.5-.16-2.98-.55-5.6-2.32-7.07-5.02-.82-1.5-1.2-3.2-1.33-4.9-.16-2.07-.03-4.14.77-6.03C4.7 2.6 7.92.72 11.6 1.7zm-.75 3.13c-.28.02-.5.26-.5.54v.27c.02 1.25.56 2.45 1.49 3.3.97.88 2.23 1.34 3.53 1.42.28.02.53-.22.54-.5v-.27c.02-.28-.2-.53-.48-.56-.98-.08-1.93-.44-2.68-1.1-.72-.65-1.16-1.55-1.22-2.52-.02-.28-.27-.5-.55-.48l-.13-.1zM9.7 5.97c-.17 0-.34.06-.47.18L8.2 7.2c-.3.28-.38.72-.2 1.08.64 1.27 1.56 2.44 2.68 3.36 1.12.92 2.44 1.6 3.85 1.96.38.1.8-.06 1-.4l.74-1.18c.17-.27.13-.62-.1-.84L14.8 9.84c-.25-.23-.63-.24-.9-.04l-.84.63c-.17.12-.4.1-.55-.05-.5-.5-.93-1.08-1.27-1.7-.13-.23-.1-.52.08-.7l.62-.67c.22-.24.23-.6.04-.86L11.2 6.17c-.13-.13-.3-.2-.48-.2h-.02z"/></svg>
+              Viber
             </a>
             <a
               href="#inquire"

@@ -20,8 +20,8 @@
   --color-card: var(--card-bg);
   --color-border: var(--border);
   --color-muted: var(--muted);
-  --font-sans: var(--font-raleway);
-  --font-display: var(--font-bebas);
+  --font-sans: var(--font-sub);
+  --font-display: var(--font-main);
 }
 
 * {
@@ -35,19 +35,19 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-raleway), Arial, sans-serif;
+  font-family: var(--font-sub), sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Display font utility — Bebas Neue */
+/* Main font — Poppins (headings, display, prominent text) */
 .font-display {
-  font-family: var(--font-bebas), Arial, sans-serif;
-  letter-spacing: 0.02em;
+  font-family: var(--font-main), sans-serif;
+  letter-spacing: 0em;
 }
 
-/* Raleway heading utility */
+/* Sub font — Inter (body, labels, UI) */
 .font-heading {
-  font-family: var(--font-raleway), Arial, sans-serif;
+  font-family: var(--font-sub), sans-serif;
 }
 
 /* Custom scrollbar */

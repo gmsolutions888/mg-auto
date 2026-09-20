@@ -8,6 +8,7 @@ import { Menu, X } from "lucide-react";
 const links = [
   { label: "Buy a Car", href: "/cars" },
   { label: "Sell a Car", href: "/sell" },
+  { label: "Partners", href: "/partners" },
   { label: "FAQs", href: "/faq" },
   { label: "About", href: "/about" },
   { label: "Contact Us", href: "/contact" },
@@ -62,10 +63,10 @@ export default function Navbar() {
           {/* Right: CTA */}
           <div className="hidden md:flex items-center gap-4">
             <Link
-              href="/cars"
+              href="/partner"
               className="px-5 py-2 bg-[#cc1111] text-white text-[10px] font-bold tracking-widest uppercase hover:bg-[#aa0e0e] transition-colors"
             >
-              Browse Cars
+              Partner Portal
             </Link>
           </div>
 
@@ -93,11 +94,11 @@ export default function Navbar() {
             ))}
             <div className="px-4 pt-3">
               <Link
-                href="/cars"
+                href="/partner"
                 onClick={() => setOpen(false)}
                 className="block text-center px-5 py-2.5 bg-[#cc1111] text-white text-[10px] font-bold tracking-widest uppercase"
               >
-                Browse Cars
+                Partner Portal
               </Link>
             </div>
           </div>

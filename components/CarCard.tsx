@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Car } from "@/lib/types";
-import { Gauge, Fuel, Settings2, CheckCircle, XCircle, Clock, Banknote, Eye } from "lucide-react";
+import { Gauge, Fuel, Settings2, CheckCircle, XCircle, Clock, Banknote, Eye, Heart } from "lucide-react";
+import { useBasket } from "@/context/BasketContext";
 
 function formatPrice(p: number) {
   return "₱ " + p.toLocaleString("en-PH");
@@ -39,6 +41,24 @@ export default function CarCard({ car }: { car: Car }) {
   const isNew = car.createdAt
     ? Date.now() - new Date(car.createdAt).getTime() < 7 * 24 * 60 * 60 * 1000
     : false;
+
+  const { item, addToBasket } = useBasket();
+  const isSelected = item?.car.id === car.id;
+  const router = useRouter();
+
+  function handleWantThis(e: React.MouseEvent) {
+    e.preventDefault();
+    addToBasket({
+      id: car.id,
+      slug: car.slug,
+      brand: car.brand,
+      model: car.model,
+      year: car.year,
+      sellingPrice: car.sellingPrice,
+      photoUrl: mainPhoto?.url,
+    });
+    router.push("/my-interest");
+  }
 
   return (
     <Link
@@ -129,7 +149,7 @@ export default function CarCard({ car }: { car: Car }) {
         </div>
 
         {/* Badges row */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 mb-4">
           <RoadworthyBadge status={car.roadworthiness?.status || "pending"} />
           {!isSold && (
             <span className="font-display flex items-center gap-1 text-[10px] font-bold tracking-widest uppercase text-blue-400 bg-blue-400/10 border border-blue-400/30 px-2 py-1">
@@ -137,6 +157,21 @@ export default function CarCard({ car }: { car: Car }) {
             </span>
           )}
         </div>
+
+        {/* I Want This Car */}
+        {!isSold && (
+          <button
+            onClick={handleWantThis}
+            className={`w-full flex items-center justify-center gap-2 py-2.5 text-[11px] font-bold tracking-widest uppercase transition-colors border ${
+              isSelected
+                ? "bg-[#cc1111] text-white border-[#cc1111]"
+                : "border-gray-200 text-gray-500 hover:border-[#cc1111] hover:text-[#cc1111]"
+            }`}
+          >
+            <Heart size={12} className={isSelected ? "fill-white" : ""} />
+            {isSelected ? "I'm Interested" : "I'm Interested in This Car"}
+          </button>
+        )}
       </div>
     </Link>
   );

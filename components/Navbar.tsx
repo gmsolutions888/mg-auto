@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Car } from "lucide-react";
+import { useBasket } from "@/context/BasketContext";
 
 const links = [
   { label: "Buy a Car", href: "/cars" },
@@ -18,6 +19,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const { item } = useBasket();
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -60,8 +62,11 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Right: CTA */}
+          {/* Right: basket + CTA */}
           <div className="hidden md:flex items-center gap-4">
+            <Link href="/my-interest" className="p-2 hover:text-[#cc1111] transition-colors">
+              <Car size={20} className="text-[#cc1111]" strokeWidth={item ? 2.5 : 1.5} style={{ opacity: item ? 1 : 0.35 }} />
+            </Link>
             <Link
               href="/partner"
               className="px-5 py-2 bg-[#cc1111] text-white text-[10px] font-bold tracking-widest uppercase hover:bg-[#aa0e0e] transition-colors"

@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Car, DiagnosisStatus } from "@/lib/types";
+import { useBasket } from "@/context/BasketContext";
 import { incrementViewCount } from "@/lib/cars";
 import { submitInquiry } from "@/lib/inquiries";
 import { motion } from "framer-motion";
@@ -94,6 +96,26 @@ export default function CarDetailClient({ car, relatedCars = [] }: { car: Car; r
   const [copied, setCopied] = useState(false);
   const [showFloating, setShowFloating] = useState(false);
   const [openDiagCats, setOpenDiagCats] = useState<string[]>([]);
+  const isSold = car.status === "sold";
+  const financing = car.financing?.available ? car.financing : computeFinancing(car.sellingPrice);
+  const mainPhoto = car.photos?.find((p) => p.isMain) || car.photos?.[0];
+
+  const { item, addToBasket } = useBasket();
+  const router = useRouter();
+  const isInterested = item?.car.id === car.id;
+
+  function handleInterested() {
+    addToBasket({
+      id: car.id,
+      slug: car.slug,
+      brand: car.brand,
+      model: car.model,
+      year: car.year,
+      sellingPrice: car.sellingPrice,
+      photoUrl: mainPhoto?.url,
+    });
+    router.push("/my-interest");
+  }
 
   useEffect(() => {
     const handler = () => setShowFloating(window.scrollY > 500);
@@ -114,10 +136,6 @@ export default function CarDetailClient({ car, relatedCars = [] }: { car: Car; r
       setTimeout(() => setCopied(false), 2000);
     });
   }
-
-  const isSold = car.status === "sold";
-  const financing = car.financing?.available ? car.financing : computeFinancing(car.sellingPrice);
-  const mainPhoto = car.photos?.find((p) => p.isMain) || car.photos?.[0];
   const photos = car.photos || [];
   const activePhotoUrl = photos[activePhoto]?.url || mainPhoto?.url;
 
@@ -217,6 +235,20 @@ export default function CarDetailClient({ car, relatedCars = [] }: { car: Car; r
                 {copied ? "Link copied!" : "Share"}
               </button>
             </div>
+
+            {!isSold && (
+              <button
+                onClick={handleInterested}
+                className={`mt-5 inline-flex items-center gap-2 px-7 py-3 text-xs font-bold tracking-widest uppercase transition-all border ${
+                  isInterested
+                    ? "bg-[#cc1111] border-[#cc1111] text-white"
+                    : "bg-white/10 border-white/40 text-white hover:bg-white hover:text-gray-900 hover:border-white"
+                }`}
+              >
+                <Send size={13} />
+                {isInterested ? "You're Interested — View Details" : "I'm Interested in This Car"}
+              </button>
+            )}
           </motion.div>
         </div>
       </section>
@@ -728,13 +760,17 @@ export default function CarDetailClient({ car, relatedCars = [] }: { car: Car; r
 
       {/* FLOATING RESERVE BUTTON */}
       {!isSold && (
-        <a
-          href="#inquire"
-          className={`fixed right-6 bottom-8 z-50 flex items-center gap-2 px-6 py-4 bg-[#cc1111] text-white text-[10px] font-bold tracking-widest uppercase hover:bg-[#aa0e0e] transition-all duration-300 shadow-lg shadow-[#cc1111]/30 ${showFloating ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none"}`}
+        <button
+          onClick={handleInterested}
+          className={`fixed right-6 bottom-8 z-50 hidden sm:flex items-center gap-2 px-6 py-4 text-[10px] font-bold tracking-widest uppercase transition-all duration-300 shadow-lg ${
+            isInterested
+              ? "bg-white text-[#cc1111] border border-[#cc1111] shadow-[#cc1111]/20"
+              : "bg-[#cc1111] text-white shadow-[#cc1111]/30 hover:bg-[#aa0e0e]"
+          } ${showFloating ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none"}`}
         >
           <Send size={13} />
-          Reserve This Unit
-        </a>
+          {isInterested ? "You're Interested" : "I'm Interested in This Car"}
+        </button>
       )}
 
       {/* STICKY MOBILE CTA */}

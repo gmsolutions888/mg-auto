@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, ClipboardList, BadgeCheck } from "lucide-react";
 
 const CAR_TYPE_PILLS = ["SUV", "Sedan", "Pickup", "Van", "Hatchback"];
 
@@ -130,27 +129,6 @@ export default function HeroBanner() {
         </div>
       </div>
 
-      {/* Trust badges — pinned to right side over the car image */}
-      <motion.div
-        initial={{ opacity: 0, x: 40 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.7, delay: 0.6 }}
-        className="absolute right-10 top-1/2 -translate-y-1/2 hidden lg:flex flex-col gap-3 z-10"
-      >
-        {[
-          { icon: <ShieldCheck size={22} />, label: "Fully Inspected" },
-          { icon: <ClipboardList size={22} />, label: "Full History" },
-          { icon: <BadgeCheck size={22} />, label: "Warranty Certified" },
-        ].map((b) => (
-          <span
-            key={b.label}
-            className="flex items-center gap-3 px-5 py-4 bg-white border border-gray-200 text-xs font-bold tracking-widest uppercase text-gray-700 shadow-sm"
-          >
-            <span className="text-[#cc1111]">{b.icon}</span>
-            {b.label}
-          </span>
-        ))}
-      </motion.div>
 
       {/* Scroll indicator */}
       <motion.div

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
 import { signIn } from "@/lib/auth";
 import { isAdmin } from "@/lib/admins";
 import { signOut } from "@/lib/auth";
@@ -61,8 +62,8 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-[#f5f5f5] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
-        <div className="text-center mb-10">
-          <h1 className="font-display text-5xl text-[#111] tracking-widest mb-1">AUTO EXCHANGE</h1>
+        <div className="flex flex-col items-center mb-10">
+          <Image src="/mg_logo.png" alt="MG Auto" width={240} height={60} className="object-contain mb-3" />
           <p className="text-[10px] font-bold tracking-[0.4em] uppercase text-[#cc1111]">
             Admin Portal
           </p>

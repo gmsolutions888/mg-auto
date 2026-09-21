@@ -8,6 +8,7 @@ import { auth } from "@/lib/firebase";
 import { getPartnerByUid } from "@/lib/partners";
 import { getNotificationsForPartner } from "@/lib/notifications";
 import { Partner } from "@/lib/types";
+import Image from "next/image";
 import { LayoutDashboard, Car, DollarSign, Bell, LogOut, KeyRound, X } from "lucide-react";
 
 interface PartnerContextValue {
@@ -114,9 +115,9 @@ export default function PartnerPortalLayout({ children }: { children: React.Reac
       <div className="min-h-screen bg-[#f5f6fa] flex">
         {/* Sidebar */}
         <aside className="fixed left-0 top-0 h-full w-60 bg-[#0d0d0d] border-r border-[#1f1f1f] flex flex-col z-40">
-          <div className="px-6 py-6 border-b border-[#1f1f1f]">
-            <h2 className="font-display text-2xl text-white tracking-widest leading-none">AUTO EXCHANGE</h2>
-            <p className="text-[9px] font-bold tracking-[0.4em] uppercase text-[#cc1111] mt-1">Partner Portal</p>
+          <div className="px-6 py-5 border-b border-[#1f1f1f]">
+            <Image src="/mg_logo.png" alt="MG Auto" width={150} height={38} className="object-contain" />
+            <p className="text-[9px] font-bold tracking-[0.4em] uppercase text-[#cc1111] mt-1.5">Partner Portal</p>
           </div>
 
           <div className="px-6 py-4 border-b border-[#1f1f1f]">

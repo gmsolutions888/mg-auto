@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { signOut } from "@/lib/auth";
@@ -72,13 +73,9 @@ export default function AdminProtectedLayout({ children }: { children: React.Rea
       {/* Sidebar */}
       <aside className="fixed left-0 top-0 h-full w-60 bg-[#0d0d0d] border-r border-[#1f1f1f] flex flex-col z-40">
         {/* Logo */}
-        <div className="px-6 py-6 border-b border-[#1f1f1f]">
-          <h2 className="font-display text-2xl text-white tracking-widest leading-none">
-            AUTO EXCHANGE
-          </h2>
-          <p className="text-[9px] font-bold tracking-[0.4em] uppercase text-[#cc1111] mt-1">
-            Admin
-          </p>
+        <div className="px-6 py-5 border-b border-[#1f1f1f]">
+          <Image src="/mg_logo.png" alt="MG Auto" width={150} height={38} className="object-contain" />
+          <p className="text-[9px] font-bold tracking-[0.4em] uppercase text-[#cc1111] mt-1.5">Admin Portal</p>
         </div>
 
         {/* Logged in user */}

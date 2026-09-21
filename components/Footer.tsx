@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Mail, MapPin } from "lucide-react";
 
 export default function Footer() {
@@ -9,12 +10,13 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <div className="mb-3">
-              <span className="font-display text-gray-900 text-xl tracking-widest uppercase leading-none">
-                AUTO EXCHANGE
-              </span>
-              <p className="text-[9px] font-bold tracking-[0.3em] uppercase text-[#cc1111] mt-0.5">
-                Pre-Owned Vehicles
-              </p>
+              <Image
+                src="/mg_logo.png"
+                alt="MG Auto Exchange"
+                width={2053}
+                height={194}
+                className="h-10 w-auto"
+              />
             </div>
             <p className="text-gray-500 text-sm leading-relaxed">
               Quality pre-owned vehicles, fully inspected and roadworthy certified.

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X, Car } from "lucide-react";
 import { useBasket } from "@/context/BasketContext";
@@ -34,24 +35,26 @@ export default function Navbar() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex flex-col leading-none">
-            <span className="font-display text-gray-900 text-xl tracking-widest uppercase">
-              AUTO EXCHANGE
-            </span>
-            <span className="text-[9px] font-semibold tracking-[0.3em] uppercase text-[#cc1111] mt-0.5">
-              Pre-Owned Vehicles
-            </span>
+          <Link href="/" className="flex items-center mr-10">
+            <Image
+              src="/mg_logo.png"
+              alt="MG Auto Exchange"
+              width={2053}
+              height={194}
+              priority
+              className="h-9 w-auto shrink-0"
+            />
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-6 shrink-0">
             {links.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
-                className={`text-[11px] font-semibold tracking-widest uppercase transition-colors duration-200 ${
+                className={`whitespace-nowrap text-[11px] font-semibold tracking-widest uppercase transition-colors duration-200 ${
                   pathname === l.href
                     ? "text-[#cc1111]"
                     : "text-gray-500 hover:text-gray-900"
@@ -63,7 +66,7 @@ export default function Navbar() {
           </nav>
 
           {/* Right: basket + CTA */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4 shrink-0 ml-auto">
             <Link href="/my-interest" className="p-2 hover:text-[#cc1111] transition-colors">
               <Car size={20} className="text-[#cc1111]" strokeWidth={item ? 2.5 : 1.5} style={{ opacity: item ? 1 : 0.35 }} />
             </Link>
@@ -77,7 +80,7 @@ export default function Navbar() {
 
           {/* Mobile toggle */}
           <button
-            className="md:hidden text-gray-700 p-2"
+            className="md:hidden ml-auto text-gray-700 p-2"
             onClick={() => setOpen(!open)}
           >
             {open ? <X size={20} /> : <Menu size={20} />}

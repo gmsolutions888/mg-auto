@@ -27,23 +27,23 @@ export default function HeroBanner() {
         }}
       />
 
-      {/* Full-bleed car image — covers entire right side including behind text */}
+      {/* Full-bleed centered car image */}
       <motion.div
-        initial={{ opacity: 0, x: 80 }}
-        animate={{ opacity: 1, x: 0 }}
+        initial={{ opacity: 0, scale: 1.05 }}
+        animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1.0, ease: "easeOut" }}
-        className="absolute right-0 top-0 bottom-0 w-[75%]"
+        className="absolute inset-0"
       >
         <Image
-          src="https://images.unsplash.com/photo-1570303278489-041bd897a873?w=1600&q=90&fit=crop"
-          alt="Honda Civic — featured car"
+          src="/hero.png"
+          alt="Ford Mustang and Toyota GR86 — featured cars"
           fill
           className="object-cover object-center"
           priority
-          sizes="75vw"
+          sizes="100vw"
         />
-        {/* Left fade — softer so car bleeds behind the text */}
-        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/10 to-transparent" />
+        {/* Left scrim so headline stays legible over the photo */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/50 to-transparent" />
         {/* Bottom fade */}
         <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-white to-transparent" />
       </motion.div>
